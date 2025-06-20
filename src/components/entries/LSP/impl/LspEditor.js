@@ -10,6 +10,7 @@ import { isFunction } from 'min-dash';
 import WS from 'isomorphic-ws';
 
 import theme from './theme';
+import { VsCodePostMessageTransport } from '../../../../utils/vscode-postmessage-transport';
 
 const placeholderConf = new Compartment();
 
