@@ -58,11 +58,12 @@ export default class LspEditor {
     documentUri = `inmemory:/document.${languageId}`,
     rootUri = documentUri.substring(0, documentUri.lastIndexOf('/') + 1),
     serverUri,
+    transportMode
   }) {
     if (languageId === undefined) {
       throw new Error('Missing manadatory parameter: languageId');
     }
-    if (serverUri === undefined) {
+    if (transportMode === 'ws' && serverUri === undefined) {
       throw new Error('Missing manadatory parameter: serverUri');
     }
 
@@ -100,7 +101,7 @@ export default class LspEditor {
       }
     }) : [];
 
-    if (isFunction(onConnectionError)) {
+    if (transportMode === 'ws' && isFunction(onConnectionError)) {
       const ws = new WS(serverUri);
       ws.addEventListener('open', (event) => {
         event.target.close();
@@ -110,10 +111,17 @@ export default class LspEditor {
       });
     }
 
-    this._client = new LanguageServerClient({
-      transport: new WebSocketTransport(serverUri),
-      rootUri
-    });
+    if (transportMode === 'postMessage') {
+      this._client = new LanguageServerClient({
+        transport: new VsCodePostMessageTransport(),
+        rootUri
+      });
+    } else {
+      this._client = new LanguageServerClient({
+        transport: new WebSocketTransport(serverUri),
+        rootUri
+      });
+    }
 
     const extensions = [
       autocompletion(),
