@@ -58,7 +58,7 @@ export default class LspEditor {
     documentUri = `inmemory:/document.${languageId}`,
     rootUri = documentUri.substring(0, documentUri.lastIndexOf('/') + 1),
     serverUri,
-    transportMode
+    transportMode = 'postMessage'
   }) {
     if (languageId === undefined) {
       throw new Error('Missing manadatory parameter: languageId');
