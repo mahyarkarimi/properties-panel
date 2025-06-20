@@ -47,7 +47,7 @@ export default class LspEditor {
     tooltipContainer,
     onChange = () => { },
     onKeyDown = () => { },
-    onLint = () => {},
+    onLint = () => { },
     onConnectionError,
     placeholder = '',
     readOnly = false,
@@ -97,20 +97,10 @@ export default class LspEditor {
     }
 
     const tooltipLayout = tooltipContainer ? tooltips({
-      tooltipSpace: function() {
+      tooltipSpace: function () {
         return tooltipContainer.getBoundingClientRect();
       }
     }) : [];
-
-    if (transportMode === 'ws' && isFunction(onConnectionError)) {
-      const ws = new WS(serverUri);
-      ws.addEventListener('open', (event) => {
-        event.target.close();
-      });
-      ws.addEventListener('error', (event) => {
-        onConnectionError(`WebSocket connection to '${serverUri}' failed.`);
-      });
-    }
 
     if (transportMode === 'postMessage') {
       this._client = new LanguageServerClient({
@@ -118,6 +108,15 @@ export default class LspEditor {
         rootUri
       });
     } else {
+      if (isFunction(onConnectionError)) {
+        const ws = new WS(serverUri);
+        ws.addEventListener('open', (event) => {
+          event.target.close();
+        });
+        ws.addEventListener('error', (event) => {
+          onConnectionError(`WebSocket connection to '${serverUri}' failed.`);
+        });
+      }
       this._client = new LanguageServerClient({
         transport: new WebSocketTransport(serverUri),
         rootUri
